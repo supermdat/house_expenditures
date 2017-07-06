@@ -6,15 +6,40 @@ output: html_notebook
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook for exploration of US House Expenditures. Data were obtained from the ProPublica website here:  
 [ProPublica](https://projects.propublica.org/represent/expenditures)  
   
-  Load the packages to be used.
+    
+    Setup the root directory.
+```{r "setup", include = FALSE}
+
+require("knitr")
+
+opts_knit$set(root.dir = "/Users/mdturse/Desktop/Analytics/house_expenditures/supermdat_general_exploration")
+
+```
+  
+    
+    Set "wd" as the working directory.
+```{r}
+
+wd <- getwd()
+wd
+
+```
+  
+    
+    Load the packages to be used.
 ```{r, message=FALSE, warning=FALSE}
 
 library("tidyverse")          # data manipulation
-library("magrittr")           # data manipulation (piping data)
+library("lazyeval")           # writing functions
+library("rlang")              # writing functions
 library("stringr")            # string manipulation
 library("lubridate")          # date manipulation
-library("stringdist")            # calculating string (character) distances
-library("ggplot2")            # general plotting
+library("stringdist")         # calculating string (character) distances
+library("tidytext")           # text manipulation
+library("hunspell")           # used for spell checking
+library("caret")              # used pre-processing the data
+library("factoextra")         # clustering
+library("cluster")            # clustering
 
 ```
   
@@ -27,7 +52,7 @@ sessionInfo()
 ```
   
     
-  Get the data.  
+    Get the data.  
     
   A generic example of the link is:  
   [https://pp-projects-static.s3.amazonaws.com/congress/staffers/2016Q4-house-disburse-detail.csv](https://pp-projects-static.s3.amazonaws.com/congress/staffers/2016Q4-house-disburse-detail.csv)
@@ -95,6 +120,12 @@ rm(list = ls(pattern = "df201")
    )
 
 # dim(AllQtrs)
+
+saveRDS(AllQtrs, paste0(wd,
+                        "/ProcessedData/",
+                        "AllQtrs.Rds"
+                        )
+        )
 str(AllQtrs)
 summary(AllQtrs)
 
@@ -105,7 +136,7 @@ summary(AllQtrs)
       
     Removing punctuation and multiple consecutive "spaces" from character variables, parsing and standardizing date variables.
 ```{r}
-
+# rm(list = ls())
 rm(list = ls(pattern = "url")
    )
 
@@ -133,6 +164,9 @@ AllQtrs_UpdateVars <- AllQtrs %>%
   mutate_if(is.character,
             funs(func_MultiSpaceToOne)
             ) %>% 
+  mutate_if(is.character,
+            funs(str_trim)
+            ) %>%
   mutate(date_clean = ifelse(nchar(date) == 5,
                              paste0(date,
                                     "-",
@@ -249,4 +283,29 @@ message("AllQtrs_UpdateVars")
 summary(AllQtrs_UpdateVars)
 
 ```
- 
+
+
+```{r}
+
+distinct(AllQtrs,
+         payee
+         ) %>% 
+  mutate(payee_FrstChr = substr(payee, 1, 1)
+         ) %>%
+  arrange(payee) %>% 
+  filter(!is.na(payee_FrstChr)
+         )
+
+
+distinct(AllQtrs_UpdateVars,
+         payee
+         ) %>% 
+  mutate(payee_FrstChr = substr(payee, 1, 1)
+         ) %>%
+  arrange(payee) %>% 
+  filter(!is.na(payee_FrstChr)
+         )
+
+```
+
+
