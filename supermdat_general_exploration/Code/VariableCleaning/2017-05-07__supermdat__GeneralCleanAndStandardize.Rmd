@@ -3,6 +3,7 @@ title: "R Notebook for US House Expenditures: General Data Cleaning"
 output: html_notebook
 ---
 
+
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook for exploration of US House Expenditures. Data were obtained from the ProPublica website here:  
 [ProPublica](https://projects.propublica.org/represent/expenditures)  
   
